@@ -41,7 +41,7 @@ export default {
                 item_name = target.getAttribute('data-name'),
                 path = [...this._path, item_name],
                 kind = target.classList.contains('folder') ? 'folder' : 'file';
-            this.action({type: 'select', path, kind});
+            this.action({type: 'select', path, kind, item: this.lookup(path)});
             /*
             if ($('.v-context').is(':visible'))
                 $(document.body).trigger('click');
@@ -104,7 +104,7 @@ export default {
         },
 
         menu(ev) {
-            if ($(ev.currentTarget).is('li')) this.onclick(ev);
+            if (ev.currentTarget.tagName === 'LI') this.onclick(ev);
             var target = ev.currentTarget,
                 item_name = target.getAttribute('data-name'), path, kind;
             if (item_name) {
@@ -114,7 +114,7 @@ export default {
             else {
                 path = this._path; kind = 'folder';
             }
-            this.action({type: 'menu', path, kind, $event: ev});
+            this.action({type: 'menu', path, kind, item: this.lookup(path), $event: ev});
         },
 
         action(ev) {
@@ -123,8 +123,15 @@ export default {
                 switch (ev.type) {
                     case 'select': 
                         if (ev.kind === 'file') this.select(ev.path); break;
-                    case 'move': this.move(ev.from, ev.to, ev.after); break;
-                    case 'rename': this.rename(ev.path, ev.from, ev.to); break;
+                    case 'move':
+                        ev.item = this.lookup([...ev.path, ev.from]);
+                        this.move(ev.from, ev.to, ev.after);
+                        break;
+                    case 'rename':
+                        ev.item = this.lookup([...ev.path, ev.from]);
+                        this.rename(ev.path, ev.from, ev.to);
+                        this._renameState = undefined;
+                        break;
                 }
             }
             this.$emit('action', ev);
@@ -210,13 +217,17 @@ export default {
             return [...path, name];
         },
 
-        renameStart(path) {
+        renameStart(path, opts={}) {
             var c = this.lookupComponent(path);
             if (c && c !== this) c.renameStart();
+            this._renameState = opts;
         },
         rename(path, from, to) {
             var e = this.lookup([...path, from]);
-            e.name = to;
+            if (this._renameState?.set === 'displayName')
+                e.displayName = to;
+            else
+                e.name = to;
         },
 
         delete(path) {

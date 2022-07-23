@@ -1,6 +1,6 @@
 <template>
     <div class="entry">
-        <span-editable ref="name" class="name" @input="rename">{{entry.name}}</span-editable>
+        <span-editable ref="name" class="name" @input="rename">{{entry.displayName || entry.name}}</span-editable>
         <tags :tags="entry.tags"/>
     </div>    
 </template>

@@ -1,8 +1,8 @@
 <template>
     <div :class="['level-'+level]">
         <div class="entry">
-            <file-list.folder-knob v-model="$data._collapsed"/>
-            <span-editable ref="name" class="name">{{entry.name}}</span-editable>
+            <folder-knob v-model="$data._collapsed"/>
+            <span-editable ref="name" class="name">{{entry.displayName || entry.name}}</span-editable>
         </div>
         <file-list ref="l" :files="entry.files" :path="_path" :level="level"
                    :selection_="subselection(selection, entry.name)"
@@ -13,6 +13,9 @@
 </template>
 
 <script>
+import FolderKnob from './folder-knob.vue';
+import SpanEditable from './span-editable.vue';
+
 /**
  * `<file-list.folder>`
  * Represents a subfolder.
@@ -40,8 +43,7 @@ export default {
     },
     components: {
         'file-list': () => import('./index.vue'),   // recursion!
-        'file-list.folder-knob': require('./folder-knob.vue').default,
-        'span-editable': require('./span-editable.vue').default
+        FolderKnob, SpanEditable
     }
 }
 </script>
